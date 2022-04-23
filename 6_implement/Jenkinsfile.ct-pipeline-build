@@ -1,6 +1,6 @@
 /*
 Purpose: 
-- Builds automated continuous training (CT) pipeline and deploy it to local docker registry
+- Builds automated continuous training (CT) pipeline and deploys it to local docker registry
 Trigger(s): 
 - New push (source code change) on pipeline related components on main branch is detected by jenkins (SCM Polling)
 Interacts with: 
@@ -26,7 +26,7 @@ pipeline {
             */
             steps {
                 // checkout
-                git branch: ${GIT_BRANCH}, url: ${GIT_REPO}
+                git branch: "${GIT_BRANCH}", url: "${GIT_REPO}"
                 // retrieve latest commit and populate environment variables
                 script {
                     env.GIT_COMMIT_SHORT = sh (
