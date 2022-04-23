@@ -58,8 +58,8 @@ pipeline {
                 }
             }
             steps {
-                echo "docker build -f ./docker/ct_pipeline/Dockerfile -t ${IMAGE_NAME} ."
-                sh "docker build -f ./docker/ct_pipeline/Dockerfile -t ${IMAGE_NAME} ."
+                echo "docker build -f ./docker/ct_pipeline -t ${IMAGE_NAME} ."
+                sh "docker build -f ./docker/ct_pipeline -t ${IMAGE_NAME} ."
                 script {
                     env.SKIPPED = false
                 }
