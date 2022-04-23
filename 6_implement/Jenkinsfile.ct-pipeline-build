@@ -65,9 +65,11 @@ pipeline {
             /*
             Push previously built CT Pipeline image to local docker registry.
             */
-            if(env.SKIPPED == false){ 
-                steps {
-                    sh "docker push ${IMAGE_NAME}"
+            steps {
+                if (env.SKIPPED == false) {
+                    script {
+                        sh "docker push ${IMAGE_NAME}"
+                    }
                 }
             }
         }
@@ -75,14 +77,16 @@ pipeline {
             /*
             Perform smoke test: ensure previously pushed CT Pipeline image can be pulled from local docker registry.
             */
-            if(env.SKIPPED == false){ 
-                steps {
-                    // remove locally-cached image
-                    sh "docker image remove ${IMAGE_NAME}"
-                    // perform test pull from local docker registry
-                    sh "docker pull ${IMAGE_NAME}"
-                    // remove locally-cached image, finally
-                    sh "docker image remove ${IMAGE_NAME}"
+            steps {
+                if (env.SKIPPED == false) { 
+                    script {
+                        // remove locally-cached image
+                        sh "docker image remove ${IMAGE_NAME}"
+                        // perform test pull from local docker registry
+                        sh "docker pull ${IMAGE_NAME}"
+                        // remove locally-cached image, finally
+                        sh "docker image remove ${IMAGE_NAME}"
+                    }
                 }
             }
         }
