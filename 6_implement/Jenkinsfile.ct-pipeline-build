@@ -66,8 +66,8 @@ pipeline {
             Push previously built CT Pipeline image to local docker registry.
             */
             steps {
-                if (env.SKIPPED == false) {
-                    script {
+                script {
+                    if (env.SKIPPED == false) {
                         sh "docker push ${IMAGE_NAME}"
                     }
                 }
@@ -78,8 +78,8 @@ pipeline {
             Perform smoke test: ensure previously pushed CT Pipeline image can be pulled from local docker registry.
             */
             steps {
-                if (env.SKIPPED == false) { 
-                    script {
+                script {
+                    if (env.SKIPPED == false) { 
                         // remove locally-cached image
                         sh "docker image remove ${IMAGE_NAME}"
                         // perform test pull from local docker registry
