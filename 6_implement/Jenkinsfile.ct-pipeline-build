@@ -41,11 +41,14 @@ pipeline {
         stage("Create and tag CT Pipeline Image") {
             /*
             Condition: execute only in case of changes on pipeline related components
-            Build and tag CT Pipeline from dockerfile.
+            Build and tag CT pipeline from dockerfile.
             Image tag consists of build timestamp and commit hash ("20220423070508-78bf84d")
             */
             when {
                 anyOf {
+                    // set of pipeline related components
+                    changeset "Jenkinsfile.ct-pipeline-build"
+                    changeset "6_implement/docker/ct_pipeline/**"
                     changeset "6_implement/data_ingestion/**"
                     changeset "6_implement/data_validation/**"
                     changeset "6_implement/data_preprocessing/**"
