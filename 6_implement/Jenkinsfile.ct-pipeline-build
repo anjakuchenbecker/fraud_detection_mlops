@@ -1,0 +1,82 @@
+/*
+Purpose: 
+- Builds automated continuous training (CT) pipeline and deploy it to local docker registry
+Trigger(s): 
+- New push (source code change) on pipeline related components on main branch is detected by jenkins (SCM Polling)
+Interacts with: 
+- Github
+- Local docker registry
+*/
+
+pipeline {
+    agent any
+    environment {
+        LOCAL_DOCKER_REPO = "fraud_detection_ct_pipeline"
+        LOCAL_DOCKER_REGISTRY = "docker_registry:5000"
+        GIT_REPO = "https://github.com/anjakuchenbecker/fraud_detection_mlops.git"
+        GIT_BRANCH = "main"
+    }
+    triggers {
+        pollSCM("* * * * *")
+    }
+    stages {
+        stage ("Checkout") {
+            /*
+            Checkout from repo and retrieve latest commit hash (short version) for later tag construction.
+            */
+            steps {
+                // checkout
+                git branch: ${GIT_BRANCH}, url: ${GIT_REPO}
+                // retrieve latest commit and populate environment variables
+                script {
+                    env.GIT_COMMIT_SHORT = sh (
+                        script: "git describe --always",
+                        returnStdout: true
+                    )
+                    env.IMAGE_NAME = "${LOCAL_DOCKER_REGISTRY}/${LOCAL_DOCKER_REPO}:${BUILD_TIMESTAMP}-${GIT_COMMIT_SHORT}"
+                }
+            }
+        }
+        stage("Create and tag CT Pipeline Image") {
+            /*
+            Condition: execute only in case of changes on pipeline related components
+            Build and tag CT Pipeline from dockerfile.
+            Image tag consists of build timestamp and commit hash ("20220423070508-78bf84d")
+            */
+            when {
+                anyOf {
+                    changeset "6_implement/data_ingestion/**"
+                    changeset "6_implement/data_validation/**"
+                    changeset "6_implement/data_preprocessing/**"
+                    changeset "6_implement/model_training/**"
+                    changeset "6_implement/model_evaluation/**"
+                    changeset "6_implement/model_validation/**"
+                }
+            }
+            steps {
+                sh "docker build -t ${IMAGE_NAME} ./docker/ct_pipeline"
+            }
+        }
+        stage("Push image to docker registry") {
+            /*
+            Push previously built CT Pipeline image to local docker registry.
+            */
+            steps {
+                sh "docker push ${IMAGE_NAME}"
+            }
+        }
+        stage("Test image pulling") {
+            /*
+            Perform smoke test: ensure previously pushed CT Pipeline image can be pulled from local docker registry.
+            */
+            steps {
+                // remove locally-cached image
+                sh "docker image remove ${IMAGE_NAME}"
+                // perform test pull from local docker registry
+                sh "docker pull ${IMAGE_NAME}"
+                // remove locally-cached image, finally
+                sh "docker image remove ${IMAGE_NAME}"
+            }
+        }
+    }
+}
