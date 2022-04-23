@@ -47,7 +47,7 @@ pipeline {
             when {
                 anyOf {
                     // set of pipeline related components
-                    changeset "Jenkinsfile.ct-pipeline-build"
+                    changeset "6_implement/Jenkinsfile.ct-pipeline-build"
                     changeset "6_implement/docker/ct_pipeline/**"
                     changeset "6_implement/data_ingestion/**"
                     changeset "6_implement/data_validation/**"
