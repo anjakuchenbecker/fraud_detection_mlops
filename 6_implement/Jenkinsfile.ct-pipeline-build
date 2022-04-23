@@ -15,6 +15,7 @@ pipeline {
         LOCAL_DOCKER_REGISTRY = "docker_registry:5000"
         GIT_REPO = "https://github.com/anjakuchenbecker/fraud_detection_mlops.git"
         GIT_BRANCH = "main"
+        SKIPPED = true
     }
     triggers {
         pollSCM("* * * * *")
@@ -55,27 +56,34 @@ pipeline {
             }
             steps {
                 sh "docker build -t ${IMAGE_NAME} ./docker/ct_pipeline"
+                script {
+                    env.SKIPPED = false
+                }
             }
         }
         stage("Push image to docker registry") {
             /*
             Push previously built CT Pipeline image to local docker registry.
             */
-            steps {
-                sh "docker push ${IMAGE_NAME}"
+            if(env.SKIPPED == false){ 
+                steps {
+                    sh "docker push ${IMAGE_NAME}"
+                }
             }
         }
         stage("Test image pulling") {
             /*
             Perform smoke test: ensure previously pushed CT Pipeline image can be pulled from local docker registry.
             */
-            steps {
-                // remove locally-cached image
-                sh "docker image remove ${IMAGE_NAME}"
-                // perform test pull from local docker registry
-                sh "docker pull ${IMAGE_NAME}"
-                // remove locally-cached image, finally
-                sh "docker image remove ${IMAGE_NAME}"
+            if(env.SKIPPED == false){ 
+                steps {
+                    // remove locally-cached image
+                    sh "docker image remove ${IMAGE_NAME}"
+                    // perform test pull from local docker registry
+                    sh "docker pull ${IMAGE_NAME}"
+                    // remove locally-cached image, finally
+                    sh "docker image remove ${IMAGE_NAME}"
+                }
             }
         }
     }
