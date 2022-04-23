@@ -58,7 +58,7 @@ pipeline {
                 }
             }
             steps {
-                sh "docker build -t ${IMAGE_NAME} -f docker/ct_pipeline"
+                sh "docker build -t ${IMAGE_NAME} docker/ct_pipeline"
                 script {
                     env.SKIPPED = false
                 }
