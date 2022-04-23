@@ -63,18 +63,22 @@ pipeline {
         }
         stage("Push image to docker registry") {
             /*
+            Condition: execute only in case of changes on pipeline related components
             Push previously built CT Pipeline image to local docker registry.
             */
             steps {
                 script {
                     if (env.SKIPPED == false) {
                         sh "docker push ${IMAGE_NAME}"
+                    } else {
+                        echo "Stage \"Push image to docker registry\" skipped due to when conditional"
                     }
                 }
             }
         }
         stage("Test image pulling") {
             /*
+            Condition: execute only in case of changes on pipeline related components
             Perform smoke test: ensure previously pushed CT Pipeline image can be pulled from local docker registry.
             */
             steps {
@@ -86,6 +90,8 @@ pipeline {
                         sh "docker pull ${IMAGE_NAME}"
                         // remove locally-cached image, finally
                         sh "docker image remove ${IMAGE_NAME}"
+                    } else {
+                        echo "Stage \"Test image pulling\" skipped due to when conditional"
                     }
                 }
             }
