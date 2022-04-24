@@ -35,8 +35,8 @@ pipeline {
                     env.LATEST_CT_PIPELINE_TAG = json.tags.max()
                     env.IMAGE_NAME = "${LOCAL_DOCKER_REGISTRY}/${LOCAL_DOCKER_REPO}:${LATEST_CT_PIPELINE_TAG}".trim()
                 }
-                echo "TBD: docker pull ${IMAGE_NAME}"
-                echo "TBD: docker run ${IMAGE_NAME}"
+                sh "docker pull ${IMAGE_NAME}"
+                sh "docker run ${IMAGE_NAME}"
             }
         }
         stage("Ingest Data") {
