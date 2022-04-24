@@ -15,7 +15,7 @@ pipeline {
         LOCAL_DOCKER_REGISTRY = "localhost:5000"
         GIT_REPO = "https://github.com/anjakuchenbecker/fraud_detection_mlops.git"
         GIT_BRANCH = "main"
-        env.SKIPPED = true
+        SKIPPED = true
     }
     triggers {
         pollSCM("* * * * *")
