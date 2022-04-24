@@ -1,0 +1,84 @@
+/*
+Purpose: 
+- Runs the latest version of automated continuous training (CT) pipeline
+Trigger(s): 
+- On schedule (once a month)
+- When data drift has been detected by prometheus monitoring
+Interacts with: 
+- Local docker registry
+- ?Feature Store / Data Sources
+- MLflow Tracking Server (and indirectly with MLflow Artifact Server)
+*/
+import groovy.json.JsonSlurper 
+
+pipeline {
+    agent any
+    environment {
+        LOCAL_DOCKER_REPO = "fraud_detection_ct_pipeline"
+        LOCAL_DOCKER_REGISTRY = "localhost:5000"
+        LOCAL_DOCKER_IMAGE_TAGS_URL = "http://${LOCAL_DOCKER_REGISTRY}/v2/${LOCAL_DOCKER_REPO}/tags/list"
+    }
+    /*
+    triggers {
+        cron("TBD")
+    }
+    */
+    stages {
+        stage("Setup CT Pipeline") {
+            /*
+            Determines latest image version of CT pipeline. Pulls images from local docker registry and runs it.
+            */
+            steps {
+                script {
+                    def response = httpRequest "${LOCAL_DOCKER_IMAGE_TAGS_URL}"
+                    def json = new JsonSlurper().parseText(response.content)
+                    env.LATEST_CT_PIPELINE_TAG = json.tags.max()
+                    env.IMAGE_NAME = "${LOCAL_DOCKER_REGISTRY}/${LOCAL_DOCKER_REPO}:${LATEST_CT_PIPELINE_TAG}".trim()
+                }
+                echo "TBD: docker pull ${IMAGE_NAME}"
+                echo "TBD: docker run ${IMAGE_NAME}"
+            }
+        }
+        stage("Ingest Data") {
+            steps {
+                echo "ingest data"
+            }
+        }
+        stage("Validate Data") {
+            steps {
+                echo "validate data"
+            }
+        }
+        stage("Preprocess Data") {
+            steps {
+                echo "preprocess data"
+            }
+        }
+        stage("Train Model") {
+            steps {
+                echo "train model"
+            }
+        }
+        stage("Evaluate Model") {
+            steps {
+                echo "evaluate model"
+            }
+        }
+        stage("Validate Model") {
+            steps {
+                echo "validate model"
+            }
+        }
+        stage("Deploy Model") {
+            steps {
+                echo "deploy model"
+            }
+        }
+        stage("Shutdown CT Pipeline") {
+            steps {
+                echo "TBD:docker rm -fv <container-name>"
+                echo "TBD:docker image rm <image-name>"
+            }
+        }
+    }
+}
