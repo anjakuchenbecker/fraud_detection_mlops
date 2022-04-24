@@ -11,6 +11,7 @@ Interacts with:
 pipeline {
     agent any
     environment {
+        // remember: such variables can not be overriden using imperative env.VAR=foo assignment (in pipeline steps)
         LOCAL_DOCKER_REPO = "fraud_detection_ct_pipeline"
         LOCAL_DOCKER_REGISTRY = "localhost:5000"
         GIT_REPO = "https://github.com/anjakuchenbecker/fraud_detection_mlops.git"
@@ -28,13 +29,14 @@ pipeline {
                 // checkout
                 git branch: "${GIT_BRANCH}", url: "${GIT_REPO}"
                 // retrieve latest commit and populate environment variables
+                // initiate indicator for change detection (in order not to repeat when-block/changeset in any stage)
                 script {
                     env.GIT_COMMIT_SHORT = sh (
                         script: "git describe --always",
                         returnStdout: true
                     )
                     env.IMAGE_NAME = "${LOCAL_DOCKER_REGISTRY}/${LOCAL_DOCKER_REPO}:${BUILD_TIMESTAMP}-${GIT_COMMIT_SHORT}".trim()
-                    env.SKIPPED = true
+                    env.CHANGES_DETECTED = false
                 }
             }
         }
@@ -61,8 +63,9 @@ pipeline {
                 dir("6_implement/docker/ct_pipeline") {
                     sh "docker build -t ${IMAGE_NAME} ."
                 }
+                // switch indicator for change detection (due to steps has been performed)
                 script {
-                    env.SKIPPED = false
+                    env.CHANGES_DETECTED = true
                 }
             }
         }
@@ -73,7 +76,7 @@ pipeline {
             */
             steps {
                 script {
-                    if (env.SKIPPED.toBoolean() == false) {
+                    if (env.CHANGES_DETECTED.toBoolean() == true) {
                         sh "docker push ${IMAGE_NAME}"
                     } else {
                         echo "Stage \"Push image to docker registry\" skipped due to when conditional"
@@ -88,7 +91,7 @@ pipeline {
             */
             steps {
                 script {
-                    if (env.SKIPPED.toBoolean() == false) { 
+                    if (env.CHANGES_DETECTED.toBoolean() == true) { 
                         // remove locally-cached image
                         sh "docker image remove ${IMAGE_NAME}"
                         // perform test pull from local docker registry
