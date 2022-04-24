@@ -78,6 +78,7 @@ pipeline {
             steps {
                 //sh "docker rm -fv ${LOCAL_DOCKER_REPO}"
                 //sh "docker image rm ${IMAGE_NAME}"
+                echo "TBD"
             }
         }
     }
