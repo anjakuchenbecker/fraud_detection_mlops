@@ -60,7 +60,8 @@ pipeline {
             steps {
                 dir("6_implement/docker/ct_pipeline") {
                     sh "ls"
-                    sh "docker build -t ${IMAGE_NAME} ."
+                    //sh "docker build -t ${IMAGE_NAME} ."
+                    sh "docker build -t localhost:5000/fraud_detection_ct_pipeline:20220424063311 ."
                 }
                 script {
                     env.SKIPPED = false
