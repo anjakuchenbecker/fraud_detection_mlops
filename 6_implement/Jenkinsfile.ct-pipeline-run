@@ -15,7 +15,7 @@ pipeline {
     agent any
     environment {
         LOCAL_DOCKER_REPO = "fraud_detection_ct_pipeline"
-        LOCAL_DOCKER_REGISTRY = "docker_registry:5000"
+        LOCAL_DOCKER_REGISTRY = "localhost:5000"
         LOCAL_DOCKER_IMAGE_TAGS_URL = "http://${LOCAL_DOCKER_REGISTRY}/v2/${LOCAL_DOCKER_REPO}/tags/list"
     }
     /*
