@@ -36,7 +36,7 @@ pipeline {
                     env.IMAGE_NAME = "${LOCAL_DOCKER_REGISTRY}/${LOCAL_DOCKER_REPO}:${LATEST_CT_PIPELINE_TAG}".trim()
                 }
                 sh "docker pull ${IMAGE_NAME}"
-                sh "docker run -d --name fraud_detection_ct_pipeline ${IMAGE_NAME}"
+                sh "docker run -it -d --name ${LOCAL_DOCKER_REPO} ${IMAGE_NAME}"
             }
         }
         stage("Ingest Data") {
@@ -76,8 +76,8 @@ pipeline {
         }
         stage("Shutdown CT Pipeline") {
             steps {
-                echo "TBD:docker rm -fv <container-name>"
-                echo "TBD:docker image rm <image-name>"
+                sh "docker rm -fv ${LOCAL_DOCKER_REPO}"
+                sh "docker image rm ${IMAGE_NAME}"
             }
         }
     }
