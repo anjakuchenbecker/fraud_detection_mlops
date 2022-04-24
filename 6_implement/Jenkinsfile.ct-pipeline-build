@@ -62,9 +62,9 @@ pipeline {
                     sh "docker build -t ${IMAGE_NAME} ."
                 }
                 script {
-                    SKIPPED = false
+                    env.SKIPPED = false
                 }
-                echo "${env.SKIPPED}"
+                echo "${SKIPPED}"
             }
         }
         stage("Push image to docker registry") {
