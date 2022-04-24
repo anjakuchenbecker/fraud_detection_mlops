@@ -15,7 +15,7 @@ pipeline {
         LOCAL_DOCKER_REGISTRY = "localhost:5000"
         GIT_REPO = "https://github.com/anjakuchenbecker/fraud_detection_mlops.git"
         GIT_BRANCH = "main"
-        SKIPPED = true
+        //SKIPPED = true
     }
     triggers {
         pollSCM("* * * * *")
@@ -35,6 +35,7 @@ pipeline {
                         returnStdout: true
                     )
                     env.IMAGE_NAME = "${LOCAL_DOCKER_REGISTRY}/${LOCAL_DOCKER_REPO}:${BUILD_TIMESTAMP}-${GIT_COMMIT_SHORT}".trim()
+                    env.SKIPPED = true
                 }
             }
         }
