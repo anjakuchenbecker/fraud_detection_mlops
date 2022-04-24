@@ -76,8 +76,8 @@ pipeline {
         }
         stage("Shutdown CT Pipeline") {
             steps {
-                sh "docker rm -fv ${LOCAL_DOCKER_REPO}"
-                sh "docker image rm ${IMAGE_NAME}"
+                //sh "docker rm -fv ${LOCAL_DOCKER_REPO}"
+                //sh "docker image rm ${IMAGE_NAME}"
             }
         }
     }
