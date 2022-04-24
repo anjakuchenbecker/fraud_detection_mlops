@@ -11,7 +11,11 @@ Interacts with:
 pipeline {
     agent any
     environment {
-        // remember: such variables can not be overriden using imperative env.VAR=foo assignment (in pipeline steps)
+        /*
+        Remember: 
+        - env variables declared in environment block cannot be overridden using imperative env.VAR=foo assignment (in pipeline steps)!
+        - they converted to String, so boolean assignments must be evaluated with .toBoolean() call in if statements
+        */
         LOCAL_DOCKER_REPO = "fraud_detection_ct_pipeline"
         LOCAL_DOCKER_REGISTRY = "localhost:5000"
         GIT_REPO = "https://github.com/anjakuchenbecker/fraud_detection_mlops.git"
@@ -31,7 +35,7 @@ pipeline {
                 // retrieve latest commit and populate environment variables
                 // initiate indicator for change detection (in order not to repeat when-block/changeset in any stage)
                 script {
-                    env.GIT_COMMIT_SHORT = sh (
+                    env.GIT_COMMIT_SHORT = sh(
                         script: "git describe --always",
                         returnStdout: true
                     )
@@ -44,7 +48,7 @@ pipeline {
             /*
             Condition: execute only in case of changes on pipeline related components
             Build and tag CT pipeline from dockerfile.
-            Image tag consists of build timestamp and commit hash ("20220423070508-78bf84d")
+            Image tag consists of build timestamp and commit hash ("20220423070508-78bf84d").
             */
             when {
                 anyOf {
@@ -63,7 +67,7 @@ pipeline {
                 dir("6_implement/docker/ct_pipeline") {
                     sh "docker build -t ${IMAGE_NAME} ."
                 }
-                // switch indicator for change detection (due to steps has been performed)
+                // switch indicator for change detection (due to stage has been performed)
                 script {
                     env.CHANGES_DETECTED = true
                 }
