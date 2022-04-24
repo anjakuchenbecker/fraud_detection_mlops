@@ -58,7 +58,8 @@ pipeline {
                 }
             }
             steps {
-                sh "docker build -f 6_implement/docker/ct_pipeline -t ${IMAGE_NAME} ."
+                sh "ls"
+                sh "docker build -f ./6_implement/docker/ct_pipeline/Dockerfile -t ${IMAGE_NAME} ."
                 script {
                     env.SKIPPED = false
                 }
