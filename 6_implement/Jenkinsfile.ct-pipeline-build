@@ -75,7 +75,7 @@ pipeline {
             */
             steps {
                 script {
-                    if (env.SKIPPED == false) {
+                    if (!env.SKIPPED) {
                         sh "docker push ${IMAGE_NAME}"
                     } else {
                         echo "Stage \"Push image to docker registry\" skipped due to when conditional"
@@ -90,7 +90,7 @@ pipeline {
             */
             steps {
                 script {
-                    if (env.SKIPPED == false) { 
+                    if (!env.SKIPPED) { 
                         // remove locally-cached image
                         sh "docker image remove ${IMAGE_NAME}"
                         // perform test pull from local docker registry
