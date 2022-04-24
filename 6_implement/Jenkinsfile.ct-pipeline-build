@@ -89,7 +89,7 @@ pipeline {
             */
             steps {
                 script {
-                    if ((SKIPPED == "false") { 
+                    if (SKIPPED == "false") { 
                         // remove locally-cached image
                         sh "docker image remove ${IMAGE_NAME}"
                         // perform test pull from local docker registry
