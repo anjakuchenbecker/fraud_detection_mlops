@@ -64,6 +64,7 @@ pipeline {
                 script {
                     env.SKIPPED = false
                 }
+                echo "${SKIPPED}"
             }
         }
         stage("Push image to docker registry") {
