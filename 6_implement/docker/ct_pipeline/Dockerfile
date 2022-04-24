@@ -2,4 +2,8 @@
 # https://hub.docker.com/r/continuumio/miniconda3
 FROM continuumio/miniconda3
 
+RUN PWD
+
+RUN DIR
+
 COPY 6_implement/data_ingestion/ /opt/custom/fraud_detection_ct_pipeline/
