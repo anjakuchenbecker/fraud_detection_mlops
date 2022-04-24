@@ -34,7 +34,7 @@ pipeline {
                         script: "git describe --always",
                         returnStdout: true
                     )
-                    env.IMAGE_NAME = "${LOCAL_DOCKER_REGISTRY}/${LOCAL_DOCKER_REPO}:${BUILD_TIMESTAMP}-${GIT_COMMIT_SHORT}"
+                    env.IMAGE_NAME = "${LOCAL_DOCKER_REGISTRY}/${LOCAL_DOCKER_REPO}:${BUILD_TIMESTAMP}-${GIT_COMMIT_SHORT}".trim()
                 }
             }
         }
@@ -59,9 +59,7 @@ pipeline {
             }
             steps {
                 dir("6_implement/docker/ct_pipeline") {
-                    sh "ls"
-                    //sh "docker build -t ${IMAGE_NAME} ."
-                    sh "docker build -t localhost:5000/fraud_detection_ct_pipeline:20220424063311 ."
+                    sh "docker build -t ${IMAGE_NAME} ."
                 }
                 script {
                     env.SKIPPED = false
