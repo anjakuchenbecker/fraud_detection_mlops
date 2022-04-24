@@ -12,7 +12,7 @@ pipeline {
     agent any
     environment {
         LOCAL_DOCKER_REPO = "fraud_detection_ct_pipeline"
-        LOCAL_DOCKER_REGISTRY = "docker_registry:5000"
+        LOCAL_DOCKER_REGISTRY = "localhost:5000"
         GIT_REPO = "https://github.com/anjakuchenbecker/fraud_detection_mlops.git"
         GIT_BRANCH = "main"
         SKIPPED = true
@@ -59,6 +59,7 @@ pipeline {
             }
             steps {
                 dir("6_implement/docker/ct_pipeline") {
+                    sh "ls"
                     sh "docker build -t ${IMAGE_NAME} ."
                 }
                 script {
