@@ -15,7 +15,7 @@ pipeline {
         LOCAL_DOCKER_REGISTRY = "localhost:5000"
         GIT_REPO = "https://github.com/anjakuchenbecker/fraud_detection_mlops.git"
         GIT_BRANCH = "main"
-        SKIPPED = true
+        SKIPPED = "true"
     }
     triggers {
         pollSCM("* * * * *")
@@ -77,7 +77,7 @@ pipeline {
             */
             steps {
                 script {
-                    if (env.SKIPPED.toBoolean() == false) {
+                    if (env.SKIPPED == "false") {
                         sh "docker push ${IMAGE_NAME}"
                     } else {
                         echo "Stage \"Push image to docker registry\" skipped due to when conditional"
@@ -92,7 +92,7 @@ pipeline {
             */
             steps {
                 script {
-                    if (env.SKIPPED.toBoolean() == false) { 
+                    if (env.SKIPPED == "false") { 
                         // remove locally-cached image
                         sh "docker image remove ${IMAGE_NAME}"
                         // perform test pull from local docker registry
