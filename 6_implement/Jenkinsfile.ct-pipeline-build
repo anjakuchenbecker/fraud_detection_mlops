@@ -58,8 +58,9 @@ pipeline {
                 }
             }
             steps {
-                sh "ls"
-                sh "docker build -t ${IMAGE_NAME} /var/jenkins_home/workspace/fraud_detection_mlops/ct-pipeline-build/6_implement/docker/ct_pipeline"
+                dir("6_implement/docker/ct_pipeline") {
+                    sh "docker build -t ${IMAGE_NAME} ."
+                }
                 script {
                     env.SKIPPED = false
                 }
