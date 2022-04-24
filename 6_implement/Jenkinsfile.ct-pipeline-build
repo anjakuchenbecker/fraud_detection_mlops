@@ -15,7 +15,6 @@ pipeline {
         LOCAL_DOCKER_REGISTRY = "localhost:5000"
         GIT_REPO = "https://github.com/anjakuchenbecker/fraud_detection_mlops.git"
         GIT_BRANCH = "main"
-        SKIPPED = "true"
     }
     triggers {
         pollSCM("* * * * *")
@@ -35,6 +34,7 @@ pipeline {
                         returnStdout: true
                     )
                     env.IMAGE_NAME = "${LOCAL_DOCKER_REGISTRY}/${LOCAL_DOCKER_REPO}:${BUILD_TIMESTAMP}-${GIT_COMMIT_SHORT}".trim()
+                    env.SKIPPED = true
                 }
             }
         }
@@ -61,12 +61,8 @@ pipeline {
                 dir("6_implement/docker/ct_pipeline") {
                     sh "docker build -t ${IMAGE_NAME} ."
                 }
-                /*
                 script {
-                    env.SKIPPED = "false"
-                }
-                */
-                withEnv(["SKIPPED=false"]) {
+                    env.SKIPPED = false
                 }
             }
         }
@@ -77,7 +73,7 @@ pipeline {
             */
             steps {
                 script {
-                    if (env.SKIPPED == "false") {
+                    if (env.SKIPPED.toBoolean() == false) {
                         sh "docker push ${IMAGE_NAME}"
                     } else {
                         echo "Stage \"Push image to docker registry\" skipped due to when conditional"
@@ -92,7 +88,7 @@ pipeline {
             */
             steps {
                 script {
-                    if (env.SKIPPED == "false") { 
+                    if (env.SKIPPED.toBoolean() == false) { 
                         // remove locally-cached image
                         sh "docker image remove ${IMAGE_NAME}"
                         // perform test pull from local docker registry
