@@ -4,6 +4,7 @@ Purpose:
 Trigger(s): 
 - On schedule (once a month)
 - When data drift has been detected by prometheus monitoring
+- When new continuous training (CT) pipeline has been deployed to local docker registry
 Interacts with: 
 - Local docker registry
 - ?Feature Store / Data Sources
@@ -44,38 +45,74 @@ pipeline {
             }
         }
         stage("Ingest Data") {
+            /*
+            Reads data from data source and splits the data into different datasets (all, train and test).
+            Input: Raw data
+            Output: raw_data.<file> (all), raw_train.<file>, raw_test.<file>
+            */
             steps {
                 sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/ingest.py"
             }
         }
         stage("Validate Data") {
+            /*
+            Checks the quality of the new data and if our expectations are met.
+            Input: raw_train.<file>, raw_test.<file>, data expectations
+            Output: Validation result (result_OK:go to next stage or result_NOK:stop pipeline)
+            */
             steps {
-                echo "validate data"
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/validate_data.py"
             }
         }
         stage("Preprocess Data") {
+            /*
+            TBD
+            Input: raw_train.<file>, raw_test.<file>
+            Output: processed_train.<file>, processed_test.<file>
+            */
             steps {
-                echo "preprocess data"
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/preprocess.py"
             }
         }
         stage("Train Model") {
+            /*
+            Re-trains model on training dataset, calculates evaluation metrics on test dataset.
+            Reports training to MLflow Tracking Server.
+            Input: processed_train.<file>, processed_test.<file>
+            Output: trained model, evaluation metrics, new experiment run on MLflow Tracking Server
+            */
             steps {
-                echo "train model"
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/train.py"
             }
         }
         stage("Evaluate Model") {
+            /*
+            Checks the performance of trained model against our expectations.
+            Input: Evaluation metrics, metric expectations
+            Output: Validation result (result_OK:go to next stage or result_NOK:stop pipeline), TBD
+            */
             steps {
-                echo "evaluate model"
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/evaluate.py"
             }
         }
         stage("Validate Model") {
+            /*
+            Deploys and tests the model in staging environment.
+            Input: trained model, staging environment
+            Output: Validation result (result_OK:go to next stage or result_NOK:stop pipeline), TBD
+            */
             steps {
-                echo "validate model"
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/validate_model.py"
             }
         }
         stage("Deploy Model") {
+            /*
+            Deploys the model in production environment.
+            Input: trained model, production environment
+            Output: Re-trained model in production environment
+            */
             steps {
-                echo "deploy model"
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/deploy.py"
             }
         }
         stage("Shutdown CT Pipeline") {

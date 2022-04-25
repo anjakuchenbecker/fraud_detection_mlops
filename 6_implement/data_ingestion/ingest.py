@@ -1,3 +1,3 @@
-# TODO: develop ingest module
+# TODO: develop ingestion module
 
-print("Hello world")
+print("ingestion module: hello world")
