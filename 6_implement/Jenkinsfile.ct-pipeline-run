@@ -29,20 +29,23 @@ pipeline {
             Determines latest image version of CT pipeline. Pulls images from local docker registry and runs it.
             */
             steps {
+                // determine latest image version
                 script {
                     def response = httpRequest "${LOCAL_DOCKER_IMAGE_TAGS_URL}"
                     def json = new JsonSlurper().parseText(response.content)
                     env.LATEST_CT_PIPELINE_TAG = json.tags.max()
                     env.IMAGE_NAME = "${LOCAL_DOCKER_REGISTRY}/${LOCAL_DOCKER_REPO}:${LATEST_CT_PIPELINE_TAG}".trim()
+                    env.CONTAINER_NAME = "${LOCAL_DOCKER_REPO}_${LATEST_CT_PIPELINE_TAG}"
                 }
+                // pull image
                 sh "docker pull ${IMAGE_NAME}"
-                sh "docker run -it -d --name ${LOCAL_DOCKER_REPO} ${IMAGE_NAME}"
+                // run container based on image (interactive and detached)
+                sh "docker run -it -d --name ${CONTAINER_NAME} ${IMAGE_NAME}"
             }
         }
         stage("Ingest Data") {
             steps {
-                sh "docker exec ${LOCAL_DOCKER_REPO} python3 --version"
-                sh "docker exec ${LOCAL_DOCKER_REPO} python3 opt/custom/fraud_detection_ct_pipeline/ingest.py"
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/ingest.py"
             }
         }
         stage("Validate Data") {
@@ -76,10 +79,13 @@ pipeline {
             }
         }
         stage("Shutdown CT Pipeline") {
+            /*
+            */
             steps {
-                //sh "docker rm -fv ${LOCAL_DOCKER_REPO}"
-                //sh "docker image rm ${IMAGE_NAME}"
-                echo "TBD"
+                // remove CT pipeline (force removal during running inclusive volumnes)
+                sh "docker rm -fv ${CONTAINER_NAME}"
+                // remove locally-cached image
+                sh "docker image rm ${IMAGE_NAME}"
             }
         }
     }

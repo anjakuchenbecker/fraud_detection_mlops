@@ -95,11 +95,11 @@ pipeline {
                 script {
                     if (env.CHANGES_DETECTED.toBoolean() == true) { 
                         // remove locally-cached image
-                        sh "docker image remove ${IMAGE_NAME}"
+                        sh "docker image rm ${IMAGE_NAME}"
                         // perform test pull from local docker registry
                         sh "docker pull ${IMAGE_NAME}"
                         // remove locally-cached image, finally
-                        sh "docker image remove ${IMAGE_NAME}"
+                        sh "docker image rm ${IMAGE_NAME}"
                     } else {
                         echo "Stage \"Test image pulling\" skipped due to when conditional"
                     }
