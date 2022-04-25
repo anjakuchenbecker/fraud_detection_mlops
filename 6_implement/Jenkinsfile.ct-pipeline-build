@@ -61,6 +61,7 @@ pipeline {
                     changeset "6_implement/model_training/**"
                     changeset "6_implement/model_evaluation/**"
                     changeset "6_implement/model_validation/**"
+                    changeset "6_implement/model_deployment/**"
                 }
             }
             steps {
