@@ -42,6 +42,7 @@ pipeline {
         stage("Ingest Data") {
             steps {
                 sh "docker exec ${LOCAL_DOCKER_REPO} python3 --version"
+                sh "docker exec ${LOCAL_DOCKER_REPO} python3 opt/custom/fraud_detection_ct_pipeline/ingest.py"
             }
         }
         stage("Validate Data") {

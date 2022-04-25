@@ -64,9 +64,6 @@ pipeline {
                 }
             }
             steps {
-                /*dir("6_implement/docker/ct_pipeline") {
-                    sh "docker build -t ${IMAGE_NAME} ."
-                }*/
                 sh "docker build -t ${IMAGE_NAME} -f 6_implement/docker/ct_pipeline/Dockerfile ."
                 // switch indicator for change detection (due to stage has been performed)
                 script {
