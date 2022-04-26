@@ -4,7 +4,7 @@ FROM continuumio/miniconda3:4.11.0
 
 # Ensure experimental-operational symmetry
 # Pipeline implementation that is used in the development or experiment environment is used in the preproduction and production environment
-COPY 6_implement/dev_environment/requirements/requirements.txt opt/custom/requirements/requirements.txt
+COPY 6_implement/docker/dev_environment/requirements/requirements.txt opt/custom/requirements/requirements.txt
 COPY 6_implement/data_ingestion/ opt/custom/fraud_detection_ct_pipeline/
 COPY 6_implement/data_validation/ opt/custom/fraud_detection_ct_pipeline/
 COPY 6_implement/data_preprocessing/ opt/custom/fraud_detection_ct_pipeline/
