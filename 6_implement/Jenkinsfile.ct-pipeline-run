@@ -85,7 +85,7 @@ pipeline {
             */
             script {
                 MLFLOW_RUN_ID = sh ( 
-                    script: "docker exec ${CONTAINER_NAME} python3 opt/custom/train.py ${MLFLOW_TRACKING_SERVER_URL} ${MLFLOW_EXPERIMENT_NAME}"
+                    script: "docker exec ${CONTAINER_NAME} python3 opt/custom/train.py ${MLFLOW_TRACKING_SERVER_URL} ${MLFLOW_EXPERIMENT_NAME}",
                     returnStdout: true
                 ).trim()
             }
