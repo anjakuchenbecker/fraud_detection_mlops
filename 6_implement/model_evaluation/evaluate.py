@@ -26,8 +26,6 @@ def setup():
     # Set tracking uri (tracking server and registry server are the same / not separated)
     # No need to set the registry uri in addition, because it defaults to the tracking URI
     mlflow.set_tracking_uri(MLFLOW_TRACKING_SERVER_URL)
-    # Get details from given run
-    run = mlflow.get_run(args.mlflow_run_id)
     return str(args.mlflow_run_id)
 
 
@@ -50,4 +48,4 @@ def evaluate_model():
 
 if __name__ == "__main__":
     mlflow_run_id = setup()
-    print(mlflow_run_id.data.params)
+    print("xxx")
