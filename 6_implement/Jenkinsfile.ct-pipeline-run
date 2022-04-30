@@ -20,6 +20,7 @@ pipeline {
         LOCAL_DOCKER_IMAGE_TAGS_URL = "http://docker_registry:5000/v2/${LOCAL_DOCKER_REPO}/tags/list"
         MLFLOW_TRACKING_SERVER_URL = "http://mlflow_tracking_server:5555"
         MLFLOW_EXPERIMENT_NAME = "fraud_detection_production"
+        MLFLOW_RUN_ID = "NONE"
         DOCKER_NETWORK = "iubh_dlbdsmtp01_t3_fraud_detection_mlops_default"
     }
     /*
@@ -44,7 +45,7 @@ pipeline {
                 // pull image
                 sh "docker pull ${IMAGE_NAME}"
                 // run container based on image (interactive, detached and connected to given network)
-                sh "docker run -it -d -e MLFLOW_TRACKING_SERVER_URL=${MLFLOW_TRACKING_SERVER_URL} -e MLFLOW_EXPERIMENT_NAME=${MLFLOW_EXPERIMENT_NAME} --network ${DOCKER_NETWORK} --name ${CONTAINER_NAME} ${IMAGE_NAME}"
+                sh "docker run -it -d -e MLFLOW_TRACKING_SERVER_URL=${MLFLOW_TRACKING_SERVER_URL} -e MLFLOW_EXPERIMENT_NAME=${MLFLOW_EXPERIMENT_NAME} -e MLFLOW_RUN_ID=${MLFLOW_RUN_ID} --network ${DOCKER_NETWORK} --name ${CONTAINER_NAME} ${IMAGE_NAME}"
             }
         }
         stage("Ingest Data") {
