@@ -18,7 +18,7 @@ pipeline {
         LOCAL_DOCKER_REPO = "fraud_detection_ct_pipeline"
         LOCAL_DOCKER_REGISTRY = "localhost:5000"
         LOCAL_DOCKER_IMAGE_TAGS_URL = "http://docker_registry:5000/v2/${LOCAL_DOCKER_REPO}/tags/list"
-        MLFLOW_TRACKING_SERVER_URL = "http://mlflow_tracking_server:5555"
+        MLFLOW_TRACKING_SERVER_URL = "http://localhost:5555"
         MLFLOW_EXPERIMENT_NAME = "fraud_detection_production"
     }
     /*
