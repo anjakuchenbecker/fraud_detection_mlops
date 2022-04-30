@@ -19,6 +19,7 @@ pipeline {
         LOCAL_DOCKER_REGISTRY = "localhost:5000"
         LOCAL_DOCKER_IMAGE_TAGS_URL = "http://docker_registry:5000/v2/${LOCAL_DOCKER_REPO}/tags/list"
         MLFLOW_TRACKING_SERVER_URL = "http://mlflow_tracking_server:5555"
+        MLFLOW_EXPERIMENT_NAME = "fraud_detection_production"
     }
     /*
     triggers {
@@ -52,7 +53,7 @@ pipeline {
             Output: raw_data.<file> (all), raw_train.<file>, raw_test.<file>
             */
             steps {
-                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/ingest.py"
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/ingest.py"
             }
         }
         stage("Validate Data") {
@@ -62,7 +63,7 @@ pipeline {
             Output: Validation result (result_OK:go to next stage or result_NOK:stop pipeline)
             */
             steps {
-                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/validate_data.py"
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/validate_data.py"
             }
         }
         stage("Preprocess Data") {
@@ -72,7 +73,7 @@ pipeline {
             Output: processed_train.<file>, processed_test.<file>
             */
             steps {
-                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/preprocess.py"
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/preprocess.py"
             }
         }
         stage("Train Model") {
@@ -82,8 +83,11 @@ pipeline {
             Input: processed_train.<file>, processed_test.<file>
             Output: trained model, evaluation metrics, new experiment run on MLflow Tracking Server
             */
-            steps {
-                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/train.py ${MLFLOW_TRACKING_SERVER_URL}"
+            script {
+                MLFLOW_RUN_ID = sh ( 
+                    script: "docker exec ${CONTAINER_NAME} python3 opt/custom/train.py ${MLFLOW_TRACKING_SERVER_URL} ${MLFLOW_EXPERIMENT_NAME}"
+                    returnStdout: true
+                ).trim()
             }
         }
         stage("Evaluate Model") {
@@ -93,7 +97,7 @@ pipeline {
             Output: Validation result (result_OK:go to next stage or result_NOK:stop pipeline), TBD
             */
             steps {
-                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/evaluate.py"
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/evaluate.py ${MLFLOW_TRACKING_SERVER_URL} ${MLFLOW_RUN_ID}"
             }
         }
         stage("Validate Model") {
@@ -103,7 +107,7 @@ pipeline {
             Output: Validation result (result_OK:go to next stage or result_NOK:stop pipeline), TBD
             */
             steps {
-                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/validate_model.py"
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/validate_model.py"
             }
         }
         stage("Deploy Model") {
@@ -113,7 +117,7 @@ pipeline {
             Output: Re-trained model in production environment
             */
             steps {
-                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/fraud_detection_ct_pipeline/deploy.py"
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/deploy.py"
             }
         }
         stage("Shutdown CT Pipeline") {
