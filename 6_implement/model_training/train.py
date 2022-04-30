@@ -2,7 +2,6 @@
 
 # External imports
 import mlflow
-# import argparse
 import os
 # Internal imports
 # NA
@@ -16,16 +15,6 @@ def setup():
     # Retrieve environment variables
     MLFLOW_TRACKING_SERVER_URL = os.environ.get("MLFLOW_TRACKING_SERVER_URL")
     MLFLOW_EXPERIMENT_NAME = os.environ.get("MLFLOW_EXPERIMENT_NAME")
-
-    # Setup the command-line parser
-    """ parser = argparse.ArgumentParser()
-    parser.add_argument("mlflow_tracking_uri",
-                        help="Set the MLflow tracking server URI",
-                        type=str)
-    parser.add_argument("mlflow_experiment_name",
-                        help="Set the name of the MLflow experiment",
-                        type=str)
-    args = parser.parse_args() """
 
     # Set tracking uri (tracking server and registry server are the same / not separated)
     # No need to set the registry uri in addition, because it defaults to the tracking URI
@@ -91,5 +80,3 @@ if __name__ == "__main__":
     setup()
     run_id = train()
     print(run_id)
-    # Set environment variable
-    os.environ["MLFLOW_RUN_ID"] = f"{run_id}"
