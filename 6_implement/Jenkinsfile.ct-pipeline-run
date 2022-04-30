@@ -18,8 +18,9 @@ pipeline {
         LOCAL_DOCKER_REPO = "fraud_detection_ct_pipeline"
         LOCAL_DOCKER_REGISTRY = "localhost:5000"
         LOCAL_DOCKER_IMAGE_TAGS_URL = "http://docker_registry:5000/v2/${LOCAL_DOCKER_REPO}/tags/list"
-        MLFLOW_TRACKING_SERVER_URL = "http://localhost:5555"
+        MLFLOW_TRACKING_SERVER_URL = "http://mlflow_tracking_server:5555"
         MLFLOW_EXPERIMENT_NAME = "fraud_detection_production"
+        DOCKER_NETWORK = "iubh_dlbdsmtp01_t3_fraud_detection_mlops_default"
     }
     /*
     triggers {
@@ -43,7 +44,7 @@ pipeline {
                 // pull image
                 sh "docker pull ${IMAGE_NAME}"
                 // run container based on image (interactive and detached)
-                sh "docker run -it -d --name ${CONTAINER_NAME} ${IMAGE_NAME}"
+                sh "docker run -it -d --network ${DOCKER_NETWORK} --name ${CONTAINER_NAME} ${IMAGE_NAME}"
             }
         }
         stage("Ingest Data") {
