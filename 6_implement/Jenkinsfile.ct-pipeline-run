@@ -43,7 +43,7 @@ pipeline {
                 }
                 // pull image
                 sh "docker pull ${IMAGE_NAME}"
-                // run container based on image (interactive and detached)
+                // run container based on image (interactive, detached and connected to given network)
                 sh "docker run -it -d --network ${DOCKER_NETWORK} --name ${CONTAINER_NAME} ${IMAGE_NAME}"
             }
         }

@@ -3,6 +3,7 @@
 # External imports
 import mlflow
 import argparse
+import os
 # Internal imports
 # NA
 
@@ -50,3 +51,4 @@ def evaluate_model():
 if __name__ == "__main__":
     run = setup()
     print(run.data.params)
+    print(os.environ.get("DOCKER_NETWORK"))
