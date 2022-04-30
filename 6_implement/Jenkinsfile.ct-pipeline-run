@@ -44,7 +44,7 @@ pipeline {
                 // pull image
                 sh "docker pull ${IMAGE_NAME}"
                 // run container based on image (interactive, detached and connected to given network)
-                sh "docker run -it -d --network ${DOCKER_NETWORK} --name ${CONTAINER_NAME} ${IMAGE_NAME}"
+                sh "docker run -it -d -e DOCKER_NETWORK=${DOCKER_NETWORK} --network ${DOCKER_NETWORK} --name ${CONTAINER_NAME} ${IMAGE_NAME}"
             }
         }
         stage("Ingest Data") {
@@ -60,7 +60,7 @@ pipeline {
         stage("Validate Data") {
             /*
             Checks the quality of the new data and if our expectations are met.
-            Input: raw_train.<file>, raw_test.<file>, data expectations
+            Input: raw_train.<file>, raw_test.<file>, raw data expectations
             Output: Validation result (result_OK:go to next stage or result_NOK:stop pipeline)
             */
             steps {
@@ -70,7 +70,7 @@ pipeline {
         stage("Preprocess Data") {
             /*
             TBD
-            Input: raw_train.<file>, raw_test.<file>
+            Input: raw_train.<file>, raw_test.<file>, processed data expectations
             Output: processed_train.<file>, processed_test.<file>
             */
             steps {
