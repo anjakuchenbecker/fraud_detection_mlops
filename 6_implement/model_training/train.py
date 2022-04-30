@@ -92,4 +92,4 @@ if __name__ == "__main__":
     run_id = train()
     print(run_id)
     # Set environment variable
-    os.environ["MLFLOW_RUN_ID"] = run_id
+    os.environ["MLFLOW_RUN_ID"] = f"{run_id}"
