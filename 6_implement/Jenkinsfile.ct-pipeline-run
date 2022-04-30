@@ -44,7 +44,7 @@ pipeline {
                 // pull image
                 sh "docker pull ${IMAGE_NAME}"
                 // run container based on image (interactive, detached and connected to given network)
-                sh "docker run -it -d -e DOCKER_NETWORK=${DOCKER_NETWORK} --network ${DOCKER_NETWORK} --name ${CONTAINER_NAME} ${IMAGE_NAME}"
+                sh "docker run -it -d -e MLFLOW_TRACKING_SERVER_URL=${MLFLOW_TRACKING_SERVER_URL} -e MLFLOW_EXPERIMENT_NAME=${MLFLOW_EXPERIMENT_NAME} --network ${DOCKER_NETWORK} --name ${CONTAINER_NAME} ${IMAGE_NAME}"
             }
         }
         stage("Ingest Data") {
@@ -85,12 +85,16 @@ pipeline {
             Output: trained model, evaluation metrics, new experiment run on MLflow Tracking Server
             */
             steps {
+                /*
                 script {
-                    MLFLOW_RUN_ID = sh ( 
-                        script: "docker exec ${CONTAINER_NAME} python3 opt/custom/train.py ${MLFLOW_TRACKING_SERVER_URL} ${MLFLOW_EXPERIMENT_NAME}",
+                    env.MLFLOW_RUN_ID = sh ( 
+                        script: "docker exec ${CONTAINER_NAME} python3 opt/custom/train.py",
                         returnStdout: true
                     ).trim()
                 }
+                */
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/train.py"
+
             }
         }
         stage("Evaluate Model") {
@@ -100,7 +104,7 @@ pipeline {
             Output: Validation result (result_OK:go to next stage or result_NOK:stop pipeline), TBD
             */
             steps {
-                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/evaluate.py ${MLFLOW_TRACKING_SERVER_URL} ${MLFLOW_RUN_ID}"
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/evaluate.py"
             }
         }
         stage("Validate Model") {
