@@ -61,7 +61,6 @@ pipeline {
             Output: raw_data.<file> (all), raw_train.<file>, raw_test.<file>
             */
             steps {
-                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/ingest.py"
                 script {
                     env.MLFLOW_RUN_ID = sh ( 
                         script: "docker exec ${CONTAINER_NAME} python3 opt/custom/ingest.py",
