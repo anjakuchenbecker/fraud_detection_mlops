@@ -28,7 +28,7 @@ def setup():
     mlflow.set_tracking_uri(MLFLOW_TRACKING_SERVER_URL)
     # Get details from given run
     run = mlflow.get_run(args.mlflow_run_id)
-    return run
+    return str(args.mlflow_run_id)
 
 
 def load_metric_expections():
@@ -49,5 +49,5 @@ def evaluate_model():
 
 
 if __name__ == "__main__":
-    run = setup()
-    print(run.data.params)
+    mlflow_run_id = setup()
+    print(mlflow_run_id.data.params)

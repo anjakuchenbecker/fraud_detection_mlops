@@ -20,6 +20,13 @@ pipeline {
         LOCAL_DOCKER_IMAGE_TAGS_URL = "http://docker_registry:5000/v2/${LOCAL_DOCKER_REPO}/tags/list"
         MLFLOW_TRACKING_SERVER_URL = "http://mlflow_tracking_server:5555"
         MLFLOW_EXPERIMENT_NAME = "fraud_detection_production"
+        MLFLOW_EXPERIMENT_DESCRIPTION = ""
+        MLFLOW_EXPERIMENT_USER = ""
+        MLFLOW_EXPERIMENT_SOURCE_TYPE = ""
+        MLFLOW_EXPERIMENT_SOURCE_NAME = ""
+        MLFLOW_EXPERIMENT_GIT_COMMIT = ""
+        MLFLOW_EXPERIMENT_GIT_BRANCH = ""
+        MLFLOW_EXPERIMENT_GIT_REPO_URL = ""
         DOCKER_NETWORK = "iubh_dlbdsmtp01_t3_fraud_detection_mlops_default"
     }
     /*
@@ -55,6 +62,12 @@ pipeline {
             */
             steps {
                 sh "docker exec ${CONTAINER_NAME} python3 opt/custom/ingest.py"
+                script {
+                    env.MLFLOW_RUN_ID = sh ( 
+                        script: "docker exec ${CONTAINER_NAME} python3 opt/custom/ingest.py",
+                        returnStdout: true
+                    ).trim()
+                }
             }
         }
         stage("Validate Data") {
@@ -85,12 +98,7 @@ pipeline {
             Output: trained model, evaluation metrics, new experiment run on MLflow Tracking Server
             */
             steps {
-                script {
-                    env.MLFLOW_RUN_ID = sh ( 
-                        script: "docker exec ${CONTAINER_NAME} python3 opt/custom/train.py",
-                        returnStdout: true
-                    ).trim()
-                }
+                sh "docker exec ${CONTAINER_NAME} python3 opt/custom/train.py ${MLFLOW_RUN_ID}"
             }
         }
         stage("Evaluate Model") {
