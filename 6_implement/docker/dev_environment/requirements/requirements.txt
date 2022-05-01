@@ -1,1 +1,2 @@
 mlflow==1.25.1
+great_expectations==0.15.3

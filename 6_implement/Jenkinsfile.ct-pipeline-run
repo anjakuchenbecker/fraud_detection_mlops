@@ -58,7 +58,7 @@ pipeline {
             /*
             Reads data from data source and splits the data into different datasets (all, train and test).
             Input: Raw data
-            Output: raw_data.<file> (all), raw_train.<file>, raw_test.<file>
+            Output: raw_data.<file> (all), raw_train.<file>, raw_test.<file>, new experiment run on MLflow Tracking Server
             */
             steps {
                 script {
@@ -73,7 +73,7 @@ pipeline {
             /*
             Checks the quality of the new data and if our expectations are met.
             Input: raw_train.<file>, raw_test.<file>, raw data expectations
-            Output: Validation result (result_OK:go to next stage or result_NOK:stop pipeline)
+            Output: Validation result (result_OK:go to next stage or result_NOK:stop pipeline), updated experiment run on MLflow Tracking Server
             */
             steps {
                 sh "docker exec ${CONTAINER_NAME} python3 opt/custom/validate_data.py"
@@ -83,7 +83,7 @@ pipeline {
             /*
             TBD
             Input: raw_train.<file>, raw_test.<file>, processed data expectations
-            Output: processed_train.<file>, processed_test.<file>
+            Output: processed_train.<file>, processed_test.<file>, updated experiment run on MLflow Tracking Server
             */
             steps {
                 sh "docker exec ${CONTAINER_NAME} python3 opt/custom/preprocess.py"
@@ -94,7 +94,7 @@ pipeline {
             Re-trains model on training dataset, calculates evaluation metrics on test dataset.
             Reports training to MLflow Tracking Server.
             Input: processed_train.<file>, processed_test.<file>
-            Output: trained model, evaluation metrics, new experiment run on MLflow Tracking Server
+            Output: trained model, evaluation metrics, updated experiment run on MLflow Tracking Server
             */
             steps {
                 sh "docker exec ${CONTAINER_NAME} python3 opt/custom/train.py ${MLFLOW_RUN_ID}"
@@ -104,7 +104,7 @@ pipeline {
             /*
             Checks the performance of trained model against our expectations.
             Input: Evaluation metrics, metric expectations
-            Output: Validation result (result_OK:go to next stage or result_NOK:stop pipeline), TBD
+            Output: Validation result (result_OK:go to next stage or result_NOK:stop pipeline), updated experiment run on MLflow Tracking Server
             */
             steps {
                 sh "docker exec ${CONTAINER_NAME} python3 opt/custom/evaluate.py ${MLFLOW_RUN_ID}"
