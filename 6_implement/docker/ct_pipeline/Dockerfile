@@ -15,4 +15,6 @@ COPY 6_implement/model_deployment/ opt/custom/
 
 RUN apt-get -y update \
     && apt-get -y install git \
+    && conda config --set channel_priority false \
+    && conda update --all --yes \
     && conda install -c conda-forge -y --file opt/custom/requirements.txt
