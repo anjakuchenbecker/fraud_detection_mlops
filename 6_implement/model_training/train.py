@@ -79,6 +79,12 @@ def train(mlflow_run_id):
         # mlflow.log_artifacts("TBD", TBD)
         # mlflow.sklearn.log_model("TBD", TBD)
 
+        # TODO log_param
+        # mlflow.log_param("num_instances", TBD)
+        # mlflow.log_param("num_test_instances", TBD)
+        # mlflow.log_param("num_train_instances", TBD)
+        # mlflow.log_param("data_file_name???", TBD)
+
 
 if __name__ == "__main__":
     mlflow_run_id = setup()

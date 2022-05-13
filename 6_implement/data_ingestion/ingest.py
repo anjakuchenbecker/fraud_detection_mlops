@@ -65,6 +65,7 @@ def log_raw_data(path_to_data):
     """
 
     # Start a new run, as we are in the first step in our pipeline
+    # TODO add run name
     with mlflow.start_run() as run:
         # TBD
         mlflow.log_artifacts(path_to_data, artifact_path=path_to_data)

@@ -3,7 +3,8 @@ Purpose:
 - Runs the latest version of automated continuous training (CT) pipeline
 Trigger(s): 
 - On schedule (once a month)
-- When data drift has been detected by prometheus monitoring
+- When drift has been detected by data drift monitoring
+- When drift has been detected by model drift monitoring
 - When new continuous training (CT) pipeline has been deployed to local docker registry
 Interacts with: 
 - Local docker registry
