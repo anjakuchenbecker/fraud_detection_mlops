@@ -1,4 +1,5 @@
 # Dockerfile for automated continuous training (CT) pipeline
+# Including: miniconda, git, mlflow, great-expectations
 # https://hub.docker.com/r/continuumio/miniconda3
 FROM continuumio/miniconda3:4.11.0
 
@@ -14,7 +15,6 @@ COPY 6_implement/model_validation/ opt/custom/
 COPY 6_implement/model_deployment/ opt/custom/
 
 RUN apt-get -y update \
-    && apt-get -y install git \
-    && conda config --set channel_priority false \
-    && conda update --all --yes \
-    && conda install -c conda-forge -y --file opt/custom/requirements.txt
+    && apt-get -y install git
+RUN pip install -U pip && \
+    pip install -r opt/custom/requirements/requirements.txt
