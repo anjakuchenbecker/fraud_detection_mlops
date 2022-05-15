@@ -17,4 +17,4 @@ COPY 6_implement/model_deployment/ opt/custom/
 RUN apt-get -y update \
     && apt-get -y install git
 RUN pip install -U pip && \
-    pip install -r opt/custom/requirements/requirements.txt
+    pip install -r opt/custom/requirements.txt
