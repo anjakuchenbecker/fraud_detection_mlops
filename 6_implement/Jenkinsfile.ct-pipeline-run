@@ -2,13 +2,13 @@
 Purpose: 
 - Runs the latest version of automated continuous training (CT) pipeline
 Trigger(s): 
-- On schedule (once a month)
-- When drift has been detected by data drift monitoring
-- When drift has been detected by model drift monitoring
-- When new continuous training (CT) pipeline has been deployed to local docker registry
+- On schedule once a month (at 00:00 on day-of-month 15.)
+- TODO: When drift has been detected by data drift monitoring
+- TODO: When drift has been detected by model drift monitoring
+- TODO: When new continuous training (CT) pipeline has been deployed to local docker registry
 Interacts with: 
 - Local docker registry
-- ?Feature Store / Data Sources
+- Data source (mysql database OLTP)
 - MLflow Tracking Server (and indirectly with MLflow Artifact Server)
 */
 import groovy.json.JsonSlurper 
@@ -30,11 +30,12 @@ pipeline {
         MLFLOW_EXPERIMENT_GIT_REPO_URL = ""
         DOCKER_NETWORK = "iubh_dlbdsmtp01_t3_fraud_detection_mlops_default"
     }
-    /*
     triggers {
-        cron("TBD")
+        /* 
+        Runs once a month (at 00:00 on day-of-month 15.)
+        */
+        cron("0 0 15 * *")
     }
-    */
     stages {
         stage("Setup CT Pipeline") {
             /*
