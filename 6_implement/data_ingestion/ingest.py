@@ -45,8 +45,8 @@ def load_and_split_raw_data(path_to_data):
                                 passwd="",
                                 use_pure=True)
         
-        # Read all data from application table to pandas dataframe
-        query = f"SELECT * FROM applications;"
+        # Read all labeled and verified data from application table to pandas dataframe
+        query = f"SELECT * FROM applications WHERE is_fraud_verified = 1 AND is_fraud IS NOT NULL;"
         raw_data_applications = pd.read_sql(query,db)
         
         # Close connection
