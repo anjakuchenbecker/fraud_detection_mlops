@@ -1,7 +1,7 @@
 # Dockerfile for automated continuous training (CT) pipeline
-# Including: miniconda, git, mlflow, great-expectations
-# https://hub.docker.com/r/continuumio/miniconda3
-FROM continuumio/miniconda3:4.11.0
+# Including: anaconda, git, mlflow, great-expectations
+# https://hub.docker.com/r/continuumio/anaconda3
+FROM continuumio/anaconda3:2021.11
 
 # Ensure experimental-operational symmetry
 # Pipeline implementation that is used in the development or experiment environment is used in the preproduction and production environment
