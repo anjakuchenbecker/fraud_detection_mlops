@@ -3,6 +3,10 @@
 # External imports
 import mlflow
 import os
+import mysql.connector as connection
+from sklearn.model_selection import train_test_split
+from datetime import datetime
+import pandas as pd
 # Internal imports
 # NA
 
@@ -28,53 +32,69 @@ def setup():
     return path_to_data
 
 
-def load_raw_data(path_to_data):
+def load_and_split_raw_data(path_to_data):
     """
-    TODO
-    """
-
-    # TODO Load raw data from data source
-    raw_data = "raw_data_dummy"
-
-    # TODO Save to raw_data.<file>
-    with open(f"{path_to_data}/raw_data.txt", 'w') as f:
-        f.write(raw_data)
-
-
-def split_raw_data(path_to_data):
-    """
-    TODO
+    Load raw data (applications) from datasource (mysql db), split into train test and save raw csv-files.
     """
 
-    # TODO Split raw data to train and test dataset
-    raw_data_train = "raw_data_train_dummy"
-    raw_data_test = "raw_data_test_dummy"
+    try:
+        # Open connection to database
+        db = connection.connect(host="database", 
+                                database="db", 
+                                user="root", 
+                                passwd="",
+                                use_pure=True)
+        
+        # Read all data from application table to pandas dataframe
+        query = f"SELECT * FROM applications;"
+        raw_data_applications = pd.read_sql(query,db)
+        
+        # Close connection
+        db.close() #close the connection
 
-    # TODO Save to raw_train.<file> and raw_test.<file>
-    with open(f"{path_to_data}/raw_train.txt", 'w') as f:
-        f.write(raw_data_train)
-    with open(f"{path_to_data}/raw_test.txt", 'w') as f:
-        f.write(raw_data_test)
+        # Define file names
+        output_file_all = "raw_data.csv"
+        output_file_train = "raw_data_train.csv"
+        output_file_test = "raw_data_test.csv"
 
-    pass
+        # Split raw data
+        raw_data_applications_train, raw_data_applications_test = train_test_split(raw_data_applications, test_size=0.30, random_state=42)
+        
+        # Save to raw_data.csv
+        raw_data_applications.to_csv(
+            os.path.join(path_to_data, output_file_all), 
+            sep=";", 
+            encoding="utf-8",
+            index=False)
+        
+        # Save to raw_data_train.csv
+        raw_data_applications_train.to_csv(
+            os.path.join(path_to_data, output_file_train), 
+            sep=";", 
+            encoding="utf-8",
+            index=False)
+        
+        # Save to raw_data_test.csv
+        raw_data_applications_test.to_csv(
+            os.path.join(path_to_data, output_file_test), 
+            sep=";", 
+            encoding="utf-8",
+            index=False)
 
-
-def log_raw_data(path_to_data):
-    """
-    TODO
-    """
-
-    # Start a new run, as we are in the first step in our pipeline
-    # TODO add run name
-    with mlflow.start_run() as run:
-        # TBD
-        mlflow.log_artifacts(path_to_data, artifact_path=path_to_data)
+        # Start a new MLflow run, as we are in the first step in our pipeline
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        run_name = f"applications incl. ground truth until {current_date}"
+        with mlflow.start_run(run_name=run_name) as run:
+            # Log raw data files
+            mlflow.log_artifact(os.path.join(path_to_data, output_file_all), artifact_path=path_to_data)
+            mlflow.log_artifact(os.path.join(path_to_data, output_file_train), artifact_path=path_to_data)
+            mlflow.log_artifact(os.path.join(path_to_data, output_file_test), artifact_path=path_to_data)
         return run.info.run_id
 
+    except Exception as e:
+        db.close()
 
 if __name__ == "__main__":
     path_to_data = setup()
-    load_raw_data(path_to_data)
-    split_raw_data(path_to_data)
-    run_id = log_raw_data(path_to_data)
+    run_id = load_and_split_raw_data(path_to_data)
     print(run_id)
