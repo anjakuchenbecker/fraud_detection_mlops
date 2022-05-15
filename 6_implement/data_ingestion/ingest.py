@@ -45,7 +45,7 @@ def load_and_split_raw_data(path_to_data):
                                 passwd="",
                                 use_pure=True)
         
-        # Read all labeled and verified data from application table to pandas dataframe
+        # Read all currently existing ground truth data from application table to pandas dataframe
         query = f"SELECT * FROM applications WHERE is_fraud_verified = 1 AND is_fraud IS NOT NULL;"
         raw_data_applications = pd.read_sql(query,db)
         
@@ -83,7 +83,7 @@ def load_and_split_raw_data(path_to_data):
 
         # Start a new MLflow run, as we are in the first step in our pipeline
         current_date = datetime.now().strftime("%Y-%m-%d")
-        run_name = f"applications incl. ground truth until {current_date}"
+        run_name = f"applications until {current_date}"
         with mlflow.start_run(run_name=run_name) as run:
             # Log raw data files
             mlflow.log_artifact(os.path.join(path_to_data, output_file_all), artifact_path=path_to_data)
