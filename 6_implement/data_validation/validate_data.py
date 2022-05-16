@@ -37,19 +37,85 @@ def setup():
 
 def check_schema_for_new_data(raw_data_files):
     """
-    Check schema of new data to detect errors in upstream system (data source)
+    Check schema of new data to detect errors in upstream system (data source).
     """
-    # TODO
-    # column count, column names, number of unique levels (categorical)
-    pass
+    
+    # Dict for MLflow parameter logging
+    mlflow_run_parameters = {}
 
-def compute_summary_statistics_for_new_data():
+    # Check schema for new data
+    for file in raw_data_files:
+        # Read raw data file
+        raw_data_applications = ge.read_csv(file,
+                            sep=";",
+                            encoding="utf-8")
+        
+        # Check 1: specific columns must exist in all raw data files
+        result = raw_data_applications.expect_table_columns_to_match_set(
+            column_set=["address", "application_request_time", "application_type",
+                        "birthday", "browser", "city", "device_type", "email",
+                        "first_name", "is_fraud", "is_fraud_verified", "last_name",
+                        "marital_status", "phone", "title", "trx"
+            ], 
+            exact_match=False
+        )
+
+        if not result.success:
+            raise AssertionError(result)
+
+        # Check 2: is_fraud column value must not be null
+        result = raw_data_applications.expect_column_values_to_not_be_null(
+            column="is_fraud"
+        )
+
+        if not result.success:
+            raise AssertionError(result)
+        
+        # Check 3: is_fraud column value must be 0 or 1
+        result = raw_data_applications.expect_column_distinct_values_to_be_in_set(
+            column="is_fraud",
+            value_set=[0,1]
+        )
+
+        if not result.success:
+            raise AssertionError(result)
+        
+        # Populate parameter information to dict
+        param_name = False
+        if file.endswith("raw_data.csv"):
+            param_name = "num_instances_all"
+            compute_summary_statistics_for_new_data(raw_data_applications)
+        if file.endswith("raw_data_train.csv"):
+            param_name = "num_instances_train"
+        if file.endswith("raw_data_test.csv"):
+            param_name = "num_instances_test"
+        mlflow_run_parameters[param_name] = raw_data_applications.shape[0]
+        
+        # Attach further information to already created MLflow run
+        with mlflow.start_run(run_id=os.environ.get("MLFLOW_RUN_ID")) as run:
+            # Log batch of parameters
+            mlflow.log_params(mlflow_run_parameters)
+
+def compute_summary_statistics_for_new_data(df):
     """
-    TBD
+    Compute summary statistics (descriptive) for new data for later data drift detection
     """
-    # TODO
-    pass
+
+    # Create output directory for reports
+    path_to_reports = "output/reports"
+    os.makedirs(path_to_reports, exist_ok=True)
+
+    # Create csv file based on pd.df.describe including all data types
+    output_file = "raw_data_summary_statistics.csv"
+    df.describe(include="all").T.to_csv(os.path.join(path_to_reports, output_file), 
+                                        encoding="utf-8")
+    
+    # Attach further information to already created MLflow run
+    with mlflow.start_run(run_id=os.environ.get("MLFLOW_RUN_ID")) as run:
+        # Log summary statistics csv
+        mlflow.log_artifact(os.path.join(path_to_reports, output_file), artifact_path=path_to_reports)
 
 if __name__ == "__main__":
     raw_data_files = setup()
-    print(raw_data_files)
+    check_schema_for_new_data(raw_data_files)
+    print("data validation succeeded:", raw_data_files)
