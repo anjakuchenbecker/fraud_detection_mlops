@@ -5,17 +5,18 @@ import mlflow
 import os
 import argparse
 import great_expectations as ge
+import pandas as pd
 # Internal imports
 # NA
 
 
-# TBD
+# Define constants
 MLFLOW_TRACKING_SERVER_URL = os.environ.get("MLFLOW_TRACKING_SERVER_URL")
 MLFLOW_EXPERIMENT_NAME = os.environ.get("MLFLOW_EXPERIMENT_NAME")
 MLFLOW_RUN_ID = ""
 PATH_TO_DATA = "output/data"
 PATH_TO_REPORTS = "output/reports"
-OUTPUT_FILE = "raw_data_summary_statistics.csv"
+OUTPUT_FILE_RAW_SUM_STATS = "raw_data_summary_statistics.csv"
 RAW_DATA_FILES = [f"{PATH_TO_DATA}/raw_data.csv", 
                         f"{PATH_TO_DATA}/raw_data_train.csv", 
                         f"{PATH_TO_DATA}/raw_data_test.csv"]
@@ -48,7 +49,7 @@ def setup():
         if not os.path.exists(file):
             raise FileNotFoundError(f"raw data file not found {file}")
 
-def check_schema_for_new_data(raw_data_files):
+def check_schema_for_new_data():
     """
     Check schema of new data to detect errors in upstream system (data source).
     """
@@ -57,7 +58,7 @@ def check_schema_for_new_data(raw_data_files):
     mlflow_run_parameters = {}
 
     # Check schema for new data
-    for file in raw_data_files:
+    for file in RAW_DATA_FILES:
         # Read raw data file
         raw_data_applications = ge.read_csv(file,
                             sep=";",
@@ -97,7 +98,6 @@ def check_schema_for_new_data(raw_data_files):
         param_name = False
         if file.endswith("raw_data.csv"):
             param_name = "num_instances_all"
-            compute_summary_statistics_for_new_data(raw_data_applications)
         if file.endswith("raw_data_train.csv"):
             param_name = "num_instances_train"
         if file.endswith("raw_data_test.csv"):
@@ -109,21 +109,27 @@ def check_schema_for_new_data(raw_data_files):
             # Log batch of parameters
             mlflow.log_params(mlflow_run_parameters)
 
-def compute_summary_statistics_for_new_data(df):
+def compute_summary_statistics_for_new_data():
     """
     Compute summary statistics (descriptive) for new data for later data drift detection
     """
 
+    # Read raw data file (all data)
+    df_raw_data_all = pd.read_csv(RAW_DATA_FILES[0],
+                        sep=";",
+                        encoding="utf-8")
+
     # Create csv file based on pd.df.describe including all data types
-    df.describe(include="all").T.to_csv(os.path.join(PATH_TO_REPORTS, OUTPUT_FILE), 
+    df_raw_data_all.describe(include="all").T.to_csv(os.path.join(PATH_TO_REPORTS, OUTPUT_FILE_RAW_SUM_STATS), 
                                         encoding="utf-8")
     
     # Attach further information to already created MLflow run
     with mlflow.start_run(run_id=MLFLOW_RUN_ID) as run:
         # Log summary statistics csv
-        mlflow.log_artifact(os.path.join(PATH_TO_REPORTS, OUTPUT_FILE), artifact_path=PATH_TO_REPORTS)
+        mlflow.log_artifact(os.path.join(PATH_TO_REPORTS, OUTPUT_FILE_RAW_SUM_STATS), artifact_path=PATH_TO_REPORTS)
 
 if __name__ == "__main__":
     setup()
-    check_schema_for_new_data(RAW_DATA_FILES)
+    check_schema_for_new_data()
+    compute_summary_statistics_for_new_data()
     print("data validation succeeded:", RAW_DATA_FILES)

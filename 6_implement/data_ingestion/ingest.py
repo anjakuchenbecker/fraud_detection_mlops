@@ -10,13 +10,13 @@ import pandas as pd
 # Internal imports
 # NA
 
-# TBD
+# Define constants
 MLFLOW_TRACKING_SERVER_URL = os.environ.get("MLFLOW_TRACKING_SERVER_URL")
 MLFLOW_EXPERIMENT_NAME = os.environ.get("MLFLOW_EXPERIMENT_NAME")
 PATH_TO_DATA = "output/data"
-OUTPUT_FILE_ALL = "raw_data.csv"
-OUTPUT_FILE_TRAIN = "raw_data_train.csv"
-OUTPUT_FILE_TEST = "raw_data_test.csv"
+OUTPUT_FILE_RAW_ALL = "raw_data.csv"
+OUTPUT_FILE_RAW_TRAIN = "raw_data_train.csv"
+OUTPUT_FILE_RAW_TEST = "raw_data_test.csv"
 
 def setup():
     """
@@ -58,21 +58,21 @@ def load_and_split_raw_data():
         
         # Save to raw_data.csv
         raw_data_applications.to_csv(
-            os.path.join(PATH_TO_DATA, OUTPUT_FILE_ALL), 
+            os.path.join(PATH_TO_DATA, OUTPUT_FILE_RAW_ALL), 
             sep=";", 
             encoding="utf-8",
             index=False)
         
         # Save to raw_data_train.csv
         raw_data_applications_train.to_csv(
-            os.path.join(PATH_TO_DATA, OUTPUT_FILE_TRAIN), 
+            os.path.join(PATH_TO_DATA, OUTPUT_FILE_RAW_TRAIN), 
             sep=";", 
             encoding="utf-8",
             index=False)
         
         # Save to raw_data_test.csv
         raw_data_applications_test.to_csv(
-            os.path.join(PATH_TO_DATA, OUTPUT_FILE_TEST), 
+            os.path.join(PATH_TO_DATA, OUTPUT_FILE_RAW_TEST), 
             sep=";", 
             encoding="utf-8",
             index=False)
@@ -82,9 +82,9 @@ def load_and_split_raw_data():
         run_name = f"applications until {current_date}"
         with mlflow.start_run(run_name=run_name) as run:
             # Log raw data files
-            mlflow.log_artifact(os.path.join(PATH_TO_DATA, OUTPUT_FILE_ALL), artifact_path=PATH_TO_DATA)
-            mlflow.log_artifact(os.path.join(PATH_TO_DATA, OUTPUT_FILE_TRAIN), artifact_path=PATH_TO_DATA)
-            mlflow.log_artifact(os.path.join(PATH_TO_DATA, OUTPUT_FILE_TEST), artifact_path=PATH_TO_DATA)
+            mlflow.log_artifact(os.path.join(PATH_TO_DATA, OUTPUT_FILE_RAW_ALL), artifact_path=PATH_TO_DATA)
+            mlflow.log_artifact(os.path.join(PATH_TO_DATA, OUTPUT_FILE_RAW_TRAIN), artifact_path=PATH_TO_DATA)
+            mlflow.log_artifact(os.path.join(PATH_TO_DATA, OUTPUT_FILE_RAW_TEST), artifact_path=PATH_TO_DATA)
         return run.info.run_id
 
     except Exception as e:
