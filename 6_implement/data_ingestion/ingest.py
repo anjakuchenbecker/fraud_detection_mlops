@@ -1,5 +1,3 @@
-# TODO: develop ingestion module
-
 # External imports
 import mlflow
 import os

@@ -1,5 +1,3 @@
-# TODO: develop data validation module
-
 # External imports
 import mlflow
 import os
@@ -129,7 +127,10 @@ def compute_summary_statistics_for_new_data():
         mlflow.log_artifact(os.path.join(PATH_TO_REPORTS, OUTPUT_FILE_RAW_SUM_STATS), artifact_path=PATH_TO_REPORTS)
 
 if __name__ == "__main__":
+    # Perform steps
     setup()
     check_schema_for_new_data()
     compute_summary_statistics_for_new_data()
-    print("data validation succeeded:", RAW_DATA_FILES)
+    
+    # Print final module message
+    print("data validation succeeded.\nvalidated file(s):", RAW_DATA_FILES, "\ncreated file(s):", os.path.join(PATH_TO_REPORTS, OUTPUT_FILE_RAW_SUM_STATS))
