@@ -13,7 +13,6 @@ import pandas as pd
 # TBD
 MLFLOW_TRACKING_SERVER_URL = os.environ.get("MLFLOW_TRACKING_SERVER_URL")
 MLFLOW_EXPERIMENT_NAME = os.environ.get("MLFLOW_EXPERIMENT_NAME")
-MLFLOW_RUN_ID = ""
 PATH_TO_DATA = "output/data"
 OUTPUT_FILE_ALL = "raw_data.csv"
 OUTPUT_FILE_TRAIN = "raw_data_train.csv"

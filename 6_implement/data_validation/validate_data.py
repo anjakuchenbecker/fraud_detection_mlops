@@ -40,6 +40,9 @@ def setup():
      # Set experiment
     mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 
+    # Create output directory for reports
+    os.makedirs(PATH_TO_REPORTS, exist_ok=True)
+
     # Check whether raw data files exist
     for file in RAW_DATA_FILES:
         if not os.path.exists(file):
@@ -110,9 +113,6 @@ def compute_summary_statistics_for_new_data(df):
     """
     Compute summary statistics (descriptive) for new data for later data drift detection
     """
-
-    # Create output directory for reports
-    os.makedirs(PATH_TO_REPORTS, exist_ok=True)
 
     # Create csv file based on pd.df.describe including all data types
     df.describe(include="all").T.to_csv(os.path.join(PATH_TO_REPORTS, OUTPUT_FILE), 
