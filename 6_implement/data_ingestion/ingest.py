@@ -10,15 +10,19 @@ import pandas as pd
 # Internal imports
 # NA
 
+# TBD
+MLFLOW_TRACKING_SERVER_URL = os.environ.get("MLFLOW_TRACKING_SERVER_URL")
+MLFLOW_EXPERIMENT_NAME = os.environ.get("MLFLOW_EXPERIMENT_NAME")
+MLFLOW_RUN_ID = ""
+PATH_TO_DATA = "output/data"
+OUTPUT_FILE_ALL = "raw_data.csv"
+OUTPUT_FILE_TRAIN = "raw_data_train.csv"
+OUTPUT_FILE_TEST = "raw_data_test.csv"
 
 def setup():
     """
     Setup the ingestion module
     """
-
-    # Retrieve environment variables
-    MLFLOW_TRACKING_SERVER_URL = os.environ.get("MLFLOW_TRACKING_SERVER_URL")
-    MLFLOW_EXPERIMENT_NAME = os.environ.get("MLFLOW_EXPERIMENT_NAME")
 
     # Set tracking uri (tracking server and registry server are the same / not separated)
     # No need to set the registry uri in addition, because it defaults to the tracking URI
@@ -27,12 +31,10 @@ def setup():
     mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 
     # Create output directory for data
-    path_to_data = "output/data"
-    os.makedirs(path_to_data, exist_ok=True)
-    return path_to_data
+    os.makedirs(PATH_TO_DATA, exist_ok=True)
 
 
-def load_and_split_raw_data(path_to_data):
+def load_and_split_raw_data():
     """
     Load raw data (applications) from datasource (mysql db), split into train test and save raw csv-files.
     """
@@ -52,31 +54,26 @@ def load_and_split_raw_data(path_to_data):
         # Close connection
         db.close() #close the connection
 
-        # Define file names
-        output_file_all = "raw_data.csv"
-        output_file_train = "raw_data_train.csv"
-        output_file_test = "raw_data_test.csv"
-
         # Split raw data
         raw_data_applications_train, raw_data_applications_test = train_test_split(raw_data_applications, test_size=0.30, random_state=42)
         
         # Save to raw_data.csv
         raw_data_applications.to_csv(
-            os.path.join(path_to_data, output_file_all), 
+            os.path.join(PATH_TO_DATA, OUTPUT_FILE_ALL), 
             sep=";", 
             encoding="utf-8",
             index=False)
         
         # Save to raw_data_train.csv
         raw_data_applications_train.to_csv(
-            os.path.join(path_to_data, output_file_train), 
+            os.path.join(PATH_TO_DATA, OUTPUT_FILE_TRAIN), 
             sep=";", 
             encoding="utf-8",
             index=False)
         
         # Save to raw_data_test.csv
         raw_data_applications_test.to_csv(
-            os.path.join(path_to_data, output_file_test), 
+            os.path.join(PATH_TO_DATA, OUTPUT_FILE_TEST), 
             sep=";", 
             encoding="utf-8",
             index=False)
@@ -86,15 +83,15 @@ def load_and_split_raw_data(path_to_data):
         run_name = f"applications until {current_date}"
         with mlflow.start_run(run_name=run_name) as run:
             # Log raw data files
-            mlflow.log_artifact(os.path.join(path_to_data, output_file_all), artifact_path=path_to_data)
-            mlflow.log_artifact(os.path.join(path_to_data, output_file_train), artifact_path=path_to_data)
-            mlflow.log_artifact(os.path.join(path_to_data, output_file_test), artifact_path=path_to_data)
+            mlflow.log_artifact(os.path.join(PATH_TO_DATA, OUTPUT_FILE_ALL), artifact_path=PATH_TO_DATA)
+            mlflow.log_artifact(os.path.join(PATH_TO_DATA, OUTPUT_FILE_TRAIN), artifact_path=PATH_TO_DATA)
+            mlflow.log_artifact(os.path.join(PATH_TO_DATA, OUTPUT_FILE_TEST), artifact_path=PATH_TO_DATA)
         return run.info.run_id
 
     except Exception as e:
         db.close()
 
 if __name__ == "__main__":
-    path_to_data = setup()
-    run_id = load_and_split_raw_data(path_to_data)
+    setup()
+    run_id = load_and_split_raw_data()
     print(run_id)

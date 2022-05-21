@@ -102,7 +102,6 @@ def check_schema_for_new_data(raw_data_files):
         mlflow_run_parameters[param_name] = raw_data_applications.shape[0]
         
         # Attach further information to already created MLflow run
-        global MLFLOW_RUN_ID
         with mlflow.start_run(run_id=MLFLOW_RUN_ID) as run:
             # Log batch of parameters
             mlflow.log_params(mlflow_run_parameters)
@@ -120,7 +119,6 @@ def compute_summary_statistics_for_new_data(df):
                                         encoding="utf-8")
     
     # Attach further information to already created MLflow run
-    global MLFLOW_RUN_ID
     with mlflow.start_run(run_id=MLFLOW_RUN_ID) as run:
         # Log summary statistics csv
         mlflow.log_artifact(os.path.join(PATH_TO_REPORTS, OUTPUT_FILE), artifact_path=PATH_TO_REPORTS)
