@@ -3,19 +3,36 @@
 # External imports
 import mlflow
 import os
+import argparse
 import great_expectations as ge
 # Internal imports
 # NA
 
+
+# TBD
+MLFLOW_TRACKING_SERVER_URL = os.environ.get("MLFLOW_TRACKING_SERVER_URL")
+MLFLOW_EXPERIMENT_NAME = os.environ.get("MLFLOW_EXPERIMENT_NAME")
+MLFLOW_RUN_ID = ""
+PATH_TO_DATA = "output/data"
+PATH_TO_REPORTS = "output/reports"
+OUTPUT_FILE = "raw_data_summary_statistics.csv"
+RAW_DATA_FILES = [f"{PATH_TO_DATA}/raw_data.csv", 
+                        f"{PATH_TO_DATA}/raw_data_train.csv", 
+                        f"{PATH_TO_DATA}/raw_data_test.csv"]
 
 def setup():
     """
     Setup the validation module
     """
 
-    # Retrieve environment variables
-    MLFLOW_TRACKING_SERVER_URL = os.environ.get("MLFLOW_TRACKING_SERVER_URL")
-    MLFLOW_EXPERIMENT_NAME = os.environ.get("MLFLOW_EXPERIMENT_NAME")
+    # Setup the command-line parser
+    parser = argparse.ArgumentParser()
+    parser.add_argument("mlflow_run_id",
+                        help="Set the MLflow run id",
+                        type=str)
+    args = parser.parse_args()
+    global MLFLOW_RUN_ID
+    MLFLOW_RUN_ID = str(args.mlflow_run_id)
 
     # Set tracking uri (tracking server and registry server are the same / not separated)
     # No need to set the registry uri in addition, because it defaults to the tracking URI
@@ -24,16 +41,9 @@ def setup():
     mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
 
     # Check whether raw data files exist
-    path_to_data = "output/data"
-    raw_data_files = [f"{path_to_data}/raw_data.csv", 
-                        f"{path_to_data}/raw_data_train.csv", 
-                        f"{path_to_data}/raw_data_test.csv"]
-
-    for file in raw_data_files:
+    for file in RAW_DATA_FILES:
         if not os.path.exists(file):
             raise FileNotFoundError(f"raw data file not found {file}")
-    
-    return raw_data_files
 
 def check_schema_for_new_data(raw_data_files):
     """
@@ -92,7 +102,8 @@ def check_schema_for_new_data(raw_data_files):
         mlflow_run_parameters[param_name] = raw_data_applications.shape[0]
         
         # Attach further information to already created MLflow run
-        with mlflow.start_run(run_id=os.environ.get("MLFLOW_RUN_ID")) as run:
+        global MLFLOW_RUN_ID
+        with mlflow.start_run(run_id=MLFLOW_RUN_ID) as run:
             # Log batch of parameters
             mlflow.log_params(mlflow_run_parameters)
 
@@ -102,20 +113,19 @@ def compute_summary_statistics_for_new_data(df):
     """
 
     # Create output directory for reports
-    path_to_reports = "output/reports"
-    os.makedirs(path_to_reports, exist_ok=True)
+    os.makedirs(PATH_TO_REPORTS, exist_ok=True)
 
     # Create csv file based on pd.df.describe including all data types
-    output_file = "raw_data_summary_statistics.csv"
-    df.describe(include="all").T.to_csv(os.path.join(path_to_reports, output_file), 
+    df.describe(include="all").T.to_csv(os.path.join(PATH_TO_REPORTS, OUTPUT_FILE), 
                                         encoding="utf-8")
     
     # Attach further information to already created MLflow run
-    with mlflow.start_run(run_id=os.environ.get("MLFLOW_RUN_ID")) as run:
+    global MLFLOW_RUN_ID
+    with mlflow.start_run(run_id=MLFLOW_RUN_ID) as run:
         # Log summary statistics csv
-        mlflow.log_artifact(os.path.join(path_to_reports, output_file), artifact_path=path_to_reports)
+        mlflow.log_artifact(os.path.join(PATH_TO_REPORTS, OUTPUT_FILE), artifact_path=PATH_TO_REPORTS)
 
 if __name__ == "__main__":
-    raw_data_files = setup()
-    check_schema_for_new_data(raw_data_files)
-    print("data validation succeeded:", raw_data_files)
+    setup()
+    check_schema_for_new_data(RAW_DATA_FILES)
+    print("data validation succeeded:", RAW_DATA_FILES)
